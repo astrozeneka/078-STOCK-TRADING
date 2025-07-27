@@ -59,7 +59,14 @@ if __name__ == '__main__':
             print(f"Recent signals for {symbol}:")
             for signal in recent_signals:
                 print(f"{signal[0]} on {signal[1]}")
-
-        print()
+            # send mail
+            from mail_notification import send_email
+            last_action = recent_signals[-1][0]
+            send_email(
+                to_email="ryanrasoarahona@gmail.com",
+                subject=f"{symbol} is ready to {last_action}",
+                message=f"{symbol} is ready to {last_action} on {recent_signals[-1][1]}. Please check the attached plot.",
+                image_path=f"plots/backtest_plot_{symbol}_{today}.png"
+            )
 
 

@@ -1,3 +1,4 @@
+from datetime import datetime
 
 import pandas as pd
 import mysql.connector
@@ -87,7 +88,7 @@ def insert_daily_prices(ticker_id, trade_date, open_price, high_price, low_price
         connection.close()
 
 
-def get_ticker_data(ticker_symbol, start_date, end_date):
+def get_ticker_data(ticker_symbol, start_date, end_date=datetime.now().strftime('%Y-%m-%d')):
     """
     Retrieve daily price data for a ticker between specified dates.
     Returns a pandas DataFrame compatible with bt.feeds.PandasData.

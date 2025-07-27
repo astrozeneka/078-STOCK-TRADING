@@ -1,6 +1,7 @@
 venv
 Archive
 *.sql
+*.png
 .idea
 .DS_Store
 .env

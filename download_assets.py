@@ -1,3 +1,4 @@
+from datetime import datetime
 
 import yfinance as yf
 import pandas as pd
@@ -20,7 +21,7 @@ parser.add_argument(
 parser.add_argument(
     '--end',
     type=str,
-    default='2025-06-30',
+    default=datetime.now().strftime('%Y-%m-%d'),
     help='End date for downloading data (default: 2022-12-31)'
 )
 args = parser.parse_args()

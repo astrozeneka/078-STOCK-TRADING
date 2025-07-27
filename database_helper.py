@@ -1,5 +1,5 @@
 
-
+import pandas as pd
 import mysql.connector
 import dotenv
 import os
@@ -83,5 +83,55 @@ def insert_daily_prices(ticker_id, trade_date, open_price, high_price, low_price
     except Exception as e:
         print(f"Error inserting daily prices: {e}")
         return False
+    finally:
+        connection.close()
+
+
+def get_ticker_data(ticker_symbol, start_date, end_date):
+    """
+    Retrieve daily price data for a ticker between specified dates.
+    Returns a pandas DataFrame compatible with bt.feeds.PandasData.
+    """
+    connection = connect_to_db()
+    if not connection:
+        return None
+
+    try:
+        cursor = connection.cursor()
+
+        # Get ticker_id
+        cursor.execute("SELECT ticker_id FROM ticker WHERE ticker_symbol = %s", (ticker_symbol,))
+        result = cursor.fetchone()
+
+        if not result:
+            print(f"Ticker {ticker_symbol} not found in database")
+            return None
+
+        ticker_id = result[0]
+
+        # Get price data
+        cursor.execute("""
+            SELECT trade_date, open_price, high_price, low_price, close_price, volume
+            FROM daily_prices 
+            WHERE ticker_id = %s AND trade_date BETWEEN %s AND %s
+            ORDER BY trade_date
+        """, (ticker_id, start_date, end_date))
+
+        rows = cursor.fetchall()
+
+        if not rows:
+            print(f"No data found for {ticker_symbol} between {start_date} and {end_date}")
+            return None
+
+        # Convert to DataFrame
+        df = pd.DataFrame(rows, columns=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
+        df['Date'] = pd.to_datetime(df['Date'])
+        df.set_index('Date', inplace=True)
+
+        return df
+
+    except Exception as e:
+        print(f"Error retrieving ticker data: {e}")
+        return None
     finally:
         connection.close()

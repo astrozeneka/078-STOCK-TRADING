@@ -1,0 +1,6 @@
+venv
+Archive
+*.sql
+.idea
+.DS_Store
+.env

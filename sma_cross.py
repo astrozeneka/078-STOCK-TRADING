@@ -7,7 +7,7 @@ from MCerebro import MCerebro
 from database_helper import get_ticker_data
 
 
-class MyStrategy(bt.Strategy):
+class MySmaCrossStrategy(bt.Strategy):
     params = dict(
         pfast=10,  # period for the fast moving average
         pslow=30  # period for the slow moving average
@@ -31,7 +31,11 @@ class MyStrategy(bt.Strategy):
             current_date = d.datetime.date(0)
             if not self.getposition(data=d):
                 if self.crossover[d][0] > 0 or self.rsi[d][0] > 50:
-                    self.buy(data=d, size=60)
+                    # unit price
+                    uniprice = d.close[0]
+                    balance = self.broker.getvalue()
+                    buy_amount = int(balance * 0.5 // uniprice) # 0.5 value is hardcoded
+                    self.buy(data=d, size=buy_amount)
                     self.signals.append(('BUY', current_date))
                     print('BUY, Symbol:', d._name, 'Close:', d.close[0])
             elif self.crossover[d][0] < 0 and self.rsi[d][0] < 50:
@@ -84,7 +88,7 @@ if __name__ == '__main__':
     data = bt.feeds.PandasData(dataname=hist, name="NVDA")
 
     cerebro = MCerebro()
-    cerebro.addstrategy(MyStrategy)
+    cerebro.addstrategy(MySmaCrossStrategy)
     cerebro.adddata(data)
 
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
